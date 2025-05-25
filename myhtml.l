@@ -3,7 +3,10 @@
 #include <string.h>
 #include <stdio.h>
 void yyerror(const char *s);
-#define debug_token(tok) printf("TOKEN: %s\n", tok);
+// #define debug_token(tok) printf("TOKEN: %s\n", tok);
+#define debug_token(tok)
+
+int line_number = 1;
 %}
 
 %option noyywrap
@@ -12,12 +15,9 @@ void yyerror(const char *s);
 
 DQUOTE \"
 SQUOTE \'
-IDENT [a-zA-Z_][a-zA-Z0-9_-]*
 POSITIVE_INT [1-9][0-9]*|[0-9]
-WHITESPACE [ \t\r\n]+
+WHITESPACE [ \t\r]+
 TEXTDATA [a-zA-Z][^"<>\n=]+
-/* TEXTDATA [a-zA-Z][a-zA-Z0-9_-]* */
-/* TEXTDATA [^<>"'= \t\r\n]+ */
 COMMENT_BODY ([^-]|(-[^-]))*
 
 %%
@@ -68,6 +68,7 @@ COMMENT_BODY ([^-]|(-[^-]))*
 "style="                    { debug_token("STYLE_ATTR"); return STYLE_ATTR; }
 "width="                    { debug_token("WIDTH_ATTR"); return WIDTH_ATTR; }
 "height="                   { debug_token("HEIGHT_ATTR"); return HEIGHT_ATTR; }
+"id="                       {return ID_ATTR;}
 
 
 {DQUOTE}[^"]*{DQUOTE}       {
@@ -96,9 +97,9 @@ COMMENT_BODY ([^-]|(-[^-]))*
 
 {WHITESPACE}                { /* skip whitespace */ }
 
+\n                          {line_number++;}
 
-.                           {
-    printf("Unknown token: '%c' (ASCII %d)\n", yytext[0], (int)yytext[0]);
-}
+
+
 
 %%

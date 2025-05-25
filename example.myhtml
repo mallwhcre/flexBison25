@@ -1,21 +1,33 @@
 <MYHTML>
 <head>
     <title>Test Title</title>
+    <!--this is a comment-->
     <meta charset="test">
     <meta name="something" content="something">
 </head>
 <body>
-    <p style="test"></p>
+    <form id="f1" style="something">
+        <!--this is a comment-->
+        <label for="name"></label>
+        <!--this is a comment-->
+        <input type="text" value="something">
+        <!--this is a comment-->
+        
+    </form>
+    <!--this is a comment-->
+    <p id="p1" style="test">
+    
+    <!--this is a comment-->
+    Hello
+    </p>
     <div style="color:blue">
-        <a href="url">
+        <a id="a1" href="url">
             An image
             <img src="source" alt="example">
         </a>
+        <p id="p2" style="test"></p>
     </div>
 
-    <form style="something">
-        <label for="name"></label>
-        <input type="text" value="something">
-    </form>
+
 </body>
 </MYHTML>

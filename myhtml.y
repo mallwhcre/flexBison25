@@ -4,6 +4,8 @@
 #include <string.h>
 void yyerror(const char *s);
 int yylex(void);
+void yyrestart(FILE * input_file);
+extern int line_number;
 %}
 
 %union {
@@ -31,11 +33,20 @@ int yylex(void);
 %token <str> QUOTED_TEXT TEXT
 %token <intval> POSITIVE_INT
 %token GT
+%token ID_ATTR
 
 %%
 
 myhtml:
     START_MYHTML head_opt body END_MYHTML
+    ;
+
+id:
+    ID_ATTR QUOTED_TEXT
+    ;
+
+comment:
+    COMMENT_START COMMENT_TEXT COMMENT_END
     ;
 
 head_opt:
@@ -44,16 +55,21 @@ head_opt:
     ;
 
 head:
-    START_HEAD title meta_list END_HEAD
+    START_HEAD title head_opt_list END_HEAD
+    ;
+
+head_opt_list:
+    /*nothing*/
+    | head_opt_list head_content
+    ;
+
+head_content:
+    meta
+    | comment
     ;
 
 title:
-    START_TITLE text END_TITLE
-    ;
-
-meta_list:
-    /* nothing */
-    | meta_list meta
+    START_TITLE text_opt END_TITLE
     ;
 
 meta:
@@ -77,6 +93,7 @@ body_content_list:
 
 body_content:
     body_element
+    | comment
     ;
 
 body_element:
@@ -87,27 +104,24 @@ body_element:
     | div 
     ;
 
-p_opt:
-    /* nothing */
-    | p;
-
-a_opt:
-    /*nothing*/
-    | a
-    ;
-
-img_opt:
-    /*nothing*/
-    | img;
-
-form_opt:
-    /*nothing*/
-    | form
-    ;
-
-
 p:
-    START_P style_opt GT END_P
+    START_P p_attr GT p_contents_list END_P
+    ;
+
+p_attr:
+    id
+    | STYLE_ATTR QUOTED_TEXT id
+    | id STYLE_ATTR QUOTED_TEXT
+    ;
+
+p_contents_list:
+    /*nothing*/
+    | p_contents_list p_contents
+    ;
+
+p_contents:
+    TEXT 
+    | comment
     ;
 
 style_opt:
@@ -116,15 +130,28 @@ style_opt:
     ;
 
 a:
-    START_A HREF_ATTR QUOTED_TEXT GT a_content END_A
+    START_A a_attr GT a_content_list END_A
+    ;
+
+a_attr:
+    HREF_ATTR QUOTED_TEXT id
+    | id HREF_ATTR QUOTED_TEXT
+    ;
+
+a_content_list:
+    comments_opt a_content comments_opt
     ;
 
 a_content:
-    /* nothing */
-    | TEXT
+    TEXT
     | img 
     | TEXT img
     | img TEXT
+    ;
+
+comments_opt:
+    /*nothing*/
+    | comment
     ;
 
 img:
@@ -134,15 +161,22 @@ img:
 img_opt_attr:
     /* nothing */
     | WIDTH_ATTR POSITIVE_INT HEIGHT_ATTR POSITIVE_INT
+    | HEIGHT_ATTR POSITIVE_INT WIDTH_ATTR POSITIVE_INT
     ;
 
 form:
-    START_FORM style_opt GT form_content_list END_FORM
+    START_FORM form_attr GT form_content_list END_FORM
+    ;
+
+form_attr:
+    id
+    | STYLE_ATTR QUOTED_TEXT id
+    | id STYLE_ATTR QUOTED_TEXT
     ;
 
 form_content_list:
-    form_content_list form_content
-    | form_content 
+    form_content_list form_content comments_opt
+    | comments_opt form_content comments_opt
     ;
 
 form_content:
@@ -164,7 +198,13 @@ label:
     ;
 
 div:
-    START_DIV style_opt GT p_opt a_opt img_opt form_opt END_DIV
+    START_DIV style_opt GT div_content_list END_DIV
+
+div_content_list:
+    /*nothing*/
+    | div_content_list body_element
+    ;
+
     
 
 text:
@@ -173,15 +213,51 @@ text:
 
 text_opt:
     /*nothing*/
-    | TEXT
+    | text
     ;
 
 %%
 
 void yyerror(const char *s) {
-    fprintf(stderr, "Parse error: %s\n", s);
 }
 
-int main(void) {
-    return yyparse();
+
+int main(int argc, char *argv[]) {
+
+    if (argc != 2)
+    {
+        fprintf(stderr, "Usage is: %s <filename>\n", argv[0]);
+        return 1;
+    }
+
+    FILE *input = fopen(argv[1], "r");
+    if (!input) {
+        perror("Error opening file");
+        return 1;
+    }
+
+    printf("======= INPUT ======\n");
+    int ch;
+    while ((ch = fgetc(input)) != EOF) {
+        putchar(ch);
+    }
+    printf("\n=====================\n");
+
+    rewind(input);
+    yyrestart(input);
+
+    int result = yyparse();
+    fclose(input);
+
+    if (result == 0)
+    {
+        printf("Program parsed successfully\n");
+    }
+
+    else 
+    {
+        printf("Syntax error on line %d\n", line_number);
+    }
+
+    return result;
 }
