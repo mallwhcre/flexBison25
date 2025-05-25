@@ -1,8 +1,8 @@
 <MYHTML>
 <head>
-<title>Test</title>
+    <title>TEST TITLE</title>
+    <meta charset="test">
 </head>
 <body>
-<p>Hello</p>
 </body>
 </MYHTML>

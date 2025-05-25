@@ -39,7 +39,7 @@ myhtml:
     ;
 
 head_opt:
-    /* empty */
+    /*nothing*/
     | head
     ;
 
@@ -52,132 +52,25 @@ title:
     ;
 
 meta_list:
-    /* empty */
+    /* nothing */
     | meta_list meta
     ;
 
 meta:
-    START_META meta_attr_group TAG_CLOSE
+    START_META meta_attr_group GT
     ;
 
 meta_attr_group:
     CHARSET_ATTR QUOTED_TEXT
-    | NAME_ATTR QUOTED_TEXT CONTENT_ATTR QUOTED_TEXT
     ;
+
 
 body:
-    START_BODY body_content_list END_BODY
-    ;
-
-body_content_list:
-    /* empty */
-    | body_content_list body_content
-    ;
-
-body_content:
-    body_element
-    | comment
-    ;
-
-body_element:
-    p
-    | a
-    | img
-    | form
-    | div
-    ;
-
-p:
-    START_P style_attr_opt GT text_with_comments END_P
-    ;
-
-style_attr_opt:
-    /* empty */
-    | STYLE_ATTR QUOTED_TEXT
-    ;
-
-text_with_comments:
-    /* empty */
-    | text_with_comments text_or_comment
-    ;
-
-text_or_comment:
-    TEXT
-    | comment
-    ;
-
-a:
-    START_A HREF_ATTR QUOTED_TEXT GT a_content END_A
-    ;
-
-a_content:
-    /* empty */
-    | TEXT
-    | img
-    | TEXT img
-    | img TEXT
-    ;
-
-img:
-    START_IMG img_attr_group TAG_CLOSE
-    ;
-
-img_attr_group:
-    SRC_ATTR QUOTED_TEXT ALT_ATTR QUOTED_TEXT img_opt_attrs
-    ;
-
-img_opt_attrs:
-    /* empty */
-    | img_opt_attrs img_opt_attr
-    ;
-
-img_opt_attr:
-    WIDTH_ATTR POSITIVE_INT
-    | HEIGHT_ATTR POSITIVE_INT
-    ;
-
-form:
-    START_FORM style_attr_opt GT form_content_list END_FORM
-    ;
-
-form_content_list:
-    form_content
-    | form_content_list form_content
-    ;
-
-form_content:
-    input
-    | label
-    ;
-
-input:
-    START_INPUT TYPE_ATTR QUOTED_TEXT input_opt_attrs TAG_CLOSE
-    ;
-
-input_opt_attrs:
-    /* empty */
-    | input_opt_attrs input_opt_attr
-    ;
-
-input_opt_attr:
-    VALUE_ATTR QUOTED_TEXT
-    | STYLE_ATTR QUOTED_TEXT
-    ;
-
-label:
-    START_LABEL FOR_ATTR QUOTED_TEXT style_attr_opt GT text_with_comments END_LABEL
-    ;
-
-div:
-    START_DIV style_attr_opt GT body_content_list END_DIV
+    START_BODY END_BODY
     ;
 
 text:
     TEXT
-    ;
-
-comment:
-    COMMENT_START COMMENT_TEXT COMMENT_END
     ;
 
 %%
