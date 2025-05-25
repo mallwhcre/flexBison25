@@ -62,15 +62,118 @@ meta:
 
 meta_attr_group:
     CHARSET_ATTR QUOTED_TEXT
+    | NAME_ATTR QUOTED_TEXT CONTENT_ATTR QUOTED_TEXT
     ;
 
 
 body:
-    START_BODY END_BODY
+    START_BODY body_content_list END_BODY
     ;
+
+body_content_list:
+    /* nothing */
+    | body_content_list body_content
+    ;
+
+body_content:
+    body_element
+    ;
+
+body_element:
+    p
+    | a
+    | img 
+    | form 
+    | div 
+    ;
+
+p_opt:
+    /* nothing */
+    | p;
+
+a_opt:
+    /*nothing*/
+    | a
+    ;
+
+img_opt:
+    /*nothing*/
+    | img;
+
+form_opt:
+    /*nothing*/
+    | form
+    ;
+
+
+p:
+    START_P style_opt GT END_P
+    ;
+
+style_opt:
+    /* nothing */
+    | STYLE_ATTR QUOTED_TEXT
+    ;
+
+a:
+    START_A HREF_ATTR QUOTED_TEXT GT a_content END_A
+    ;
+
+a_content:
+    /* nothing */
+    | TEXT
+    | img 
+    | TEXT img
+    | img TEXT
+    ;
+
+img:
+    START_IMG SRC_ATTR QUOTED_TEXT ALT_ATTR QUOTED_TEXT img_opt_attr GT
+    ;
+
+img_opt_attr:
+    /* nothing */
+    | WIDTH_ATTR POSITIVE_INT HEIGHT_ATTR POSITIVE_INT
+    ;
+
+form:
+    START_FORM style_opt GT form_content_list END_FORM
+    ;
+
+form_content_list:
+    form_content_list form_content
+    | form_content 
+    ;
+
+form_content:
+    input
+    | label 
+    ;
+
+input:
+    START_INPUT TYPE_ATTR QUOTED_TEXT input_opt_attr GT
+    ;
+
+input_opt_attr:
+    /* nothing */
+    | VALUE_ATTR QUOTED_TEXT style_opt
+    ;
+
+label:
+    START_LABEL FOR_ATTR QUOTED_TEXT style_opt GT text_opt END_LABEL
+    ;
+
+div:
+    START_DIV style_opt GT p_opt a_opt img_opt form_opt END_DIV
+    
 
 text:
     TEXT
+    ;
+
+text_opt:
+    /*nothing*/
+    | TEXT
     ;
 
 %%

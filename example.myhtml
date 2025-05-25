@@ -1,8 +1,21 @@
 <MYHTML>
 <head>
-    <title>TEST TITLE</title>
+    <title>Test Title</title>
     <meta charset="test">
+    <meta name="something" content="something">
 </head>
 <body>
+    <p style="test"></p>
+    <div style="color:blue">
+        <a href="url">
+            An image
+            <img src="source" alt="example">
+        </a>
+    </div>
+
+    <form style="something">
+        <label for="name"></label>
+        <input type="text" value="something">
+    </form>
 </body>
 </MYHTML>

@@ -15,11 +15,13 @@ SQUOTE \'
 IDENT [a-zA-Z_][a-zA-Z0-9_-]*
 POSITIVE_INT [1-9][0-9]*|[0-9]
 WHITESPACE [ \t\r\n]+
-TEXTDATA [^"<>\n]+
+TEXTDATA [a-zA-Z][^"<>\n=]+
 /* TEXTDATA [a-zA-Z][a-zA-Z0-9_-]* */
+/* TEXTDATA [^<>"'= \t\r\n]+ */
 COMMENT_BODY ([^-]|(-[^-]))*
 
 %%
+
 
 "<!--"                      { BEGIN(COMMENT); debug_token("COMMENT_START"); return COMMENT_START; }
 <COMMENT>{COMMENT_BODY}     { yylval.str = strdup(yytext); debug_token("COMMENT_TEXT"); return COMMENT_TEXT; }
@@ -67,6 +69,7 @@ COMMENT_BODY ([^-]|(-[^-]))*
 "width="                    { debug_token("WIDTH_ATTR"); return WIDTH_ATTR; }
 "height="                   { debug_token("HEIGHT_ATTR"); return HEIGHT_ATTR; }
 
+
 {DQUOTE}[^"]*{DQUOTE}       {
     yylval.str = strdup(yytext);
     debug_token("QUOTED_TEXT");
@@ -92,6 +95,7 @@ COMMENT_BODY ([^-]|(-[^-]))*
 }
 
 {WHITESPACE}                { /* skip whitespace */ }
+
 
 .                           {
     printf("Unknown token: '%c' (ASCII %d)\n", yytext[0], (int)yytext[0]);
