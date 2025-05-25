@@ -7,6 +7,7 @@ void yyerror(const char *s);
 #define debug_token(tok)
 
 int line_number = 1;
+// int id_count = 0;
 %}
 
 %option noyywrap
@@ -53,7 +54,6 @@ COMMENT_BODY ([^-]|(-[^-]))*
 "<div "                     { debug_token("START_DIV"); return START_DIV; }
 "<meta "                    { debug_token("START_META"); return START_META; }
 
-"/>"                        { debug_token("TAG_CLOSE"); return TAG_CLOSE; }
 ">"                         { debug_token("GT"); return GT; }
 
 "charset="                  { debug_token("CHARSET_ATTR"); return CHARSET_ATTR; }

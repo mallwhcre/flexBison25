@@ -2,10 +2,59 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+#include <stdbool.h>
+#include <string.h>
 void yyerror(const char *s);
 int yylex(void);
 void yyrestart(FILE * input_file);
 extern int line_number;
+
+#define MAX_ERRORS 100
+#define MAX_IDS 100
+#define MAX_ID_LEN 100
+
+typedef enum
+{
+    title_err,
+    id_err,
+    href_err,
+    src_err,
+    type_err,
+    for_err,
+    style_err
+} err_type_t;
+
+typedef struct
+{
+    int line;
+    err_type_t type;
+} error_t;
+
+error_t error_stack[MAX_ERRORS];
+int error_pointer = 0;
+
+char id_array[MAX_IDS][MAX_ID_LEN];
+int id_count = 0;
+
+bool check_id(const char *id)
+{
+    for (int i = 0; i < id_count; i++)
+    {
+        if (strcmp(id, id_array[i]) == 0)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void insert_id(const char *id)
+{
+    strcpy(id_array[id_count], id);
+    id_count++;
+}
+
 %}
 
 %union {
@@ -16,7 +65,7 @@ extern int line_number;
 %token START_MYHTML END_MYHTML
 %token START_HEAD END_HEAD
 %token START_TITLE END_TITLE
-%token START_META TAG_CLOSE
+%token START_META
 %token START_BODY END_BODY
 %token START_P END_P
 %token START_A END_A
@@ -33,16 +82,14 @@ extern int line_number;
 %token <str> QUOTED_TEXT TEXT
 %token <intval> POSITIVE_INT
 %token GT
-%token ID_ATTR
+%token <str> ID_ATTR
+
+%type <str> text text_opt
 
 %%
 
 myhtml:
     START_MYHTML head_opt body END_MYHTML
-    ;
-
-id:
-    ID_ATTR QUOTED_TEXT
     ;
 
 comment:
@@ -69,7 +116,15 @@ head_content:
     ;
 
 title:
-    START_TITLE text_opt END_TITLE
+    START_TITLE text_opt END_TITLE 
+    {
+        if ($2 && strlen($2) > 60)
+        {
+            error_pointer++;
+            error_stack[error_pointer].line = line_number;
+            error_stack[error_pointer].type = title_err;
+        }
+    }
     ;
 
 meta:
@@ -109,9 +164,48 @@ p:
     ;
 
 p_attr:
-    id
-    | STYLE_ATTR QUOTED_TEXT id
-    | id STYLE_ATTR QUOTED_TEXT
+    ID_ATTR QUOTED_TEXT
+    {
+        // printf("Checking id %s", $1);
+        if (!check_id($2))
+        {
+            error_pointer++;
+            error_stack[error_pointer].line = line_number;
+            error_stack[error_pointer].type = id_err;
+        }
+        else 
+        {
+            insert_id($1);
+        }
+    }
+    | STYLE_ATTR QUOTED_TEXT ID_ATTR QUOTED_TEXT
+    {
+        // printf("Checking id %s", $3);
+        if (!check_id($3))
+        {
+            error_pointer++;
+            error_stack[error_pointer].line = line_number;
+            error_stack[error_pointer].type = id_err;
+        }
+        else
+        {
+            insert_id($3);
+        }
+    }
+    | ID_ATTR QUOTED_TEXT STYLE_ATTR QUOTED_TEXT
+    {
+        // printf("Checking id %s", $2);
+        if (!check_id($2))
+        {
+            error_pointer++;
+            error_stack[error_pointer].line = line_number;
+            error_stack[error_pointer].type = id_err;
+        }
+        else
+        {
+            insert_id($2);
+        }
+    }
     ;
 
 p_contents_list:
@@ -134,8 +228,32 @@ a:
     ;
 
 a_attr:
-    HREF_ATTR QUOTED_TEXT id
-    | id HREF_ATTR QUOTED_TEXT
+    HREF_ATTR QUOTED_TEXT ID_ATTR QUOTED_TEXT
+    {
+        if (!check_id($4))
+        {
+            error_pointer++;
+            error_stack[error_pointer].line = line_number;
+            error_stack[error_pointer].type = id_err;
+        }
+        else
+        {
+            insert_id($4);
+        }
+    }
+    | ID_ATTR QUOTED_TEXT HREF_ATTR QUOTED_TEXT
+    {
+        if (!check_id($2))
+        {
+            error_pointer++;
+            error_stack[error_pointer].line = line_number;
+            error_stack[error_pointer].type = id_err;
+        }
+        else
+        {
+            insert_id($2);
+        }
+    }
     ;
 
 a_content_list:
@@ -169,9 +287,45 @@ form:
     ;
 
 form_attr:
-    id
-    | STYLE_ATTR QUOTED_TEXT id
-    | id STYLE_ATTR QUOTED_TEXT
+    ID_ATTR QUOTED_TEXT
+    {
+        if (!check_id($2))
+        {
+            error_pointer++;
+            error_stack[error_pointer].line = line_number;
+            error_stack[error_pointer].type = id_err;
+        }
+        else
+        {
+            insert_id($2);
+        }
+    }
+    | STYLE_ATTR QUOTED_TEXT ID_ATTR QUOTED_TEXT
+    {
+        if (!check_id($4))
+        {
+            error_pointer++;
+            error_stack[error_pointer].line = line_number;
+            error_stack[error_pointer].type = id_err;
+        }
+        else
+        {
+            insert_id($4);
+        }
+    }
+    | ID_ATTR QUOTED_TEXT STYLE_ATTR QUOTED_TEXT
+    {
+        if (!check_id($2))
+        {
+            error_pointer++;
+            error_stack[error_pointer].line = line_number;
+            error_stack[error_pointer].type = id_err;
+        }
+        else
+        {
+            insert_id($2);
+        }
+    }
     ;
 
 form_content_list:
@@ -208,12 +362,12 @@ div_content_list:
     
 
 text:
-    TEXT
+    TEXT { $$ = $1; }
     ;
 
 text_opt:
-    /*nothing*/
-    | text
+    /*nothing*/ { $$ = NULL; }
+    | text { $$ = $1; }
     ;
 
 %%
@@ -249,9 +403,16 @@ int main(int argc, char *argv[]) {
     int result = yyparse();
     fclose(input);
 
+    while (error_pointer != 0)
+    {
+        printf("Error %d at line %d\n", (int)error_stack[error_pointer].type, (int)error_stack[error_pointer].line);
+        error_pointer--;
+
+    }
+
     if (result == 0)
     {
-        printf("Program parsed successfully\n");
+        printf("Program has correct syntax\n");
     }
 
     else 

@@ -27,7 +27,22 @@
         </a>
         <p id="p2" style="test"></p>
     </div>
+        <div style="color:blue">
+        <a id="a2" href="url">
+            An image
+            <img src="source" alt="example">
+        </a>
+        <p id="p10" style="test"></p>
+    </div>
 
+        <form id="f5" style="something">
+        <!--this is a comment-->
+        <label for="name"></label>
+        <!--this is a comment-->
+        <input type="text" value="something">
+        <!--this is a comment-->
+        
+    </form>
 
 </body>
 </MYHTML>
