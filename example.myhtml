@@ -7,10 +7,12 @@
 </head>
 <body>
     <form id="f1" style="something">
+        
         <!--this is a comment-->
-        <label for="name"></label>
-        <!--this is a comment-->
-        <input type="text" value="something">
+        <input id="i1" type="text" value="something">
+        <input id="i2" type="checkbox" value="something">
+        <input id="i3" type="submit" value="something">
+        <label for="i1"></label>
         <!--this is a comment-->
         
     </form>
@@ -21,28 +23,12 @@
     Hello
     </p>
     <div style="color:blue">
-        <a id="a1" href="url">
+        <a id="a1" href="./something.com">
             An image
-            <img src="source" alt="example">
+            <img src="http://image.png" alt="example">
         </a>
         <p id="p2" style="test"></p>
     </div>
-        <div style="color:blue">
-        <a id="a2" href="url">
-            An image
-            <img src="source" alt="example">
-        </a>
-        <p id="p10" style="test"></p>
-    </div>
-
-        <form id="f5" style="something">
-        <!--this is a comment-->
-        <label for="name"></label>
-        <!--this is a comment-->
-        <input type="text" value="something">
-        <!--this is a comment-->
-        
-    </form>
 
 </body>
 </MYHTML>

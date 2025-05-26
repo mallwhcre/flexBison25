@@ -4,14 +4,25 @@
 #include <string.h>
 #include <stdbool.h>
 #include <string.h>
-void yyerror(const char *s);
-int yylex(void);
-void yyrestart(FILE * input_file);
-extern int line_number;
 
 #define MAX_ERRORS 100
 #define MAX_IDS 100
 #define MAX_ID_LEN 100
+
+
+void yyerror(const char *s);
+int yylex(void);
+void yyrestart(FILE * input_file);
+
+char *strip_quotes(char *str);
+bool check_id(char *id);
+bool check_input_id(char *id);
+void insert_id(char *id);
+void insert_input_id(char *id);
+bool is_url(char *url);
+bool is_valid_href(char *href);
+bool type_is_valid(char *type);
+
 
 typedef enum
 {
@@ -34,26 +45,14 @@ error_t error_stack[MAX_ERRORS];
 int error_pointer = 0;
 
 char id_array[MAX_IDS][MAX_ID_LEN];
+char input_id_array[MAX_IDS][MAX_ID_LEN];
 int id_count = 0;
+int input_id_count = 0;
 
-bool check_id(const char *id)
-{
-    for (int i = 0; i < id_count; i++)
-    {
-        if (strcmp(id, id_array[i]) == 0)
-        {
-            return false;
-        }
-    }
+bool submit_type_found = false;
 
-    return true;
-}
+extern int line_number;
 
-void insert_id(const char *id)
-{
-    strcpy(id_array[id_count], id);
-    id_count++;
-}
 
 %}
 
@@ -240,6 +239,13 @@ a_attr:
         {
             insert_id($4);
         }
+
+        if (!is_valid_href($2))
+        {
+            error_pointer++;
+            error_stack[error_pointer].line = line_number;
+            error_stack[error_pointer].type = href_err;
+        }
     }
     | ID_ATTR QUOTED_TEXT HREF_ATTR QUOTED_TEXT
     {
@@ -253,6 +259,15 @@ a_attr:
         {
             insert_id($2);
         }
+
+        if (!is_valid_href($4))
+        {
+            error_pointer++;
+            error_stack[error_pointer].line = line_number;
+            error_stack[error_pointer].type = href_err;
+        }
+
+        // printf("HREF IS: %s", $4);
     }
     ;
 
@@ -274,6 +289,14 @@ comments_opt:
 
 img:
     START_IMG SRC_ATTR QUOTED_TEXT ALT_ATTR QUOTED_TEXT img_opt_attr GT
+    {
+        if (!is_url($3))
+        {
+            error_pointer++;
+            error_stack[error_pointer].line = line_number;
+            error_stack[error_pointer].type = src_err;
+        }
+    }
     ;
 
 img_opt_attr:
@@ -339,7 +362,92 @@ form_content:
     ;
 
 input:
-    START_INPUT TYPE_ATTR QUOTED_TEXT input_opt_attr GT
+    START_INPUT input_attrs input_opt_attr GT
+    ;
+
+input_attrs:
+    ID_ATTR QUOTED_TEXT TYPE_ATTR QUOTED_TEXT
+    {
+        if (!check_id($2))
+        {
+            error_pointer++;
+            error_stack[error_pointer].line = line_number;
+            error_stack[error_pointer].type = id_err;
+        }
+
+        else
+        {
+            insert_id($2);
+            insert_input_id($2);
+        }
+
+        if (!type_is_valid($4))
+        {
+            error_pointer++;
+            error_stack[error_pointer].line = line_number;
+            error_stack[error_pointer].type = type_err;
+        }
+
+        else
+        {
+            if (submit_type_found)
+            {
+                error_pointer++;
+                error_stack[error_pointer].line = line_number;
+                error_stack[error_pointer].type = type_err;
+            }
+
+
+            else if (strcmp($4, "submit") == 0)
+            {
+
+                submit_type_found = true;
+            }
+
+            
+        }
+    }
+    | TYPE_ATTR QUOTED_TEXT ID_ATTR QUOTED_TEXT
+    {
+        if (!check_id($4))
+        {
+            error_pointer++;
+            error_stack[error_pointer].line = line_number;
+            error_stack[error_pointer].type = id_err;
+        }
+
+        else
+        {
+            insert_id($4);
+            insert_input_id($4);
+        }
+
+        if (!type_is_valid($2))
+        {
+            error_pointer++;
+            error_stack[error_pointer].line = line_number;
+            error_stack[error_pointer].type = type_err;
+        }
+
+        else
+        {
+            if (submit_type_found)
+            {
+                error_pointer++;
+                error_stack[error_pointer].line = line_number;
+                error_stack[error_pointer].type = type_err;
+            }
+
+
+            else if (strcmp($2, "submit") == 0)
+            {
+
+                submit_type_found = true;
+            }
+
+            
+        }
+    }
     ;
 
 input_opt_attr:
@@ -349,6 +457,14 @@ input_opt_attr:
 
 label:
     START_LABEL FOR_ATTR QUOTED_TEXT style_opt GT text_opt END_LABEL
+    {
+        if (check_input_id($3))
+        {
+            error_pointer++;
+            error_stack[error_pointer].line = line_number;
+            error_stack[error_pointer].type = for_err;
+        }
+    }
     ;
 
 div:
@@ -422,3 +538,89 @@ int main(int argc, char *argv[]) {
 
     return result;
 }
+
+char *strip_quotes(char *str)
+{
+    size_t len = strlen(str);
+    if (len >= 2 && str[0] == '"' && str[len - 1] == '"')
+    {
+        memmove(str, str + 1, len - 2);
+        str[len - 2] = '\0';
+    }
+
+    return str;
+}
+
+bool check_id(char *id)
+{
+    // printf("checking %s", id);
+
+    strip_quotes(id);
+    for (int i = 0; i < id_count; i++)
+    {
+        if (strcmp(id, id_array[i]) == 0)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+bool check_input_id(char *id)
+{
+    strip_quotes(id);
+    for (int i = 0; i < input_id_count; i++)
+    {
+        if (strcmp(id, input_id_array[i]) == 0)
+        {
+            return false;
+        }
+    }
+
+    return true;
+}
+
+void insert_id(char *id)
+{
+    strip_quotes(id);
+    strcpy(id_array[id_count], id);
+    id_count++;
+}
+
+void insert_input_id(char *id)
+{
+    strip_quotes(id);
+    strcpy(input_id_array[input_id_count], id);
+    input_id_count++;
+}
+
+bool is_url(char *url)
+{
+    strip_quotes(url);
+    if (strncmp(url, "http://", 7) == 0 || strncmp(url, "https://", 8) == 0 || strncmp(url, "./", 2) == 0 || strncmp(url, "../", 3) == 0)
+    {
+        return true;
+    }
+
+    return false;
+}
+
+
+bool is_valid_href(char *href)
+{
+    strip_quotes(href);
+    if (is_url || (href[0] == '#' && !check_id(href + 1)))
+    {
+        return true;
+    }
+
+    return false;
+}
+
+bool type_is_valid(char *type)
+{
+    strip_quotes(type);
+    return (strcmp(type, "text") == 0 || strcmp(type, "checkbox") == 0 || strcmp(type, "radio") == 0 || strcmp(type, "submit") == 0);
+}
+
