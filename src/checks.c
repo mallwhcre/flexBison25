@@ -88,7 +88,7 @@ static bool is_valid_property(const char *prop)
 static bool is_valid_font_size(const char *value)
 {
     if (!value || strlen(value) < 3)
-    { 
+    {
         return false;
     }
 
@@ -96,19 +96,18 @@ static bool is_valid_font_size(const char *value)
 
     if (len >= 3 && strcmp(value + len - 2, "px") == 0)
     {
-        len -= 2; 
-    }
-    
-    else if (len >= 2 && value[len - 1] == '%')
-    {
-        len -= 1; 
+        len -= 2;
     }
 
-    else 
+    else if (len >= 2 && value[len - 1] == '%')
+    {
+        len -= 1;
+    }
+
+    else
     {
         return false;
     }
-
 
     for (int i = 0; i < len; i++)
     {
@@ -118,147 +117,157 @@ static bool is_valid_font_size(const char *value)
         }
     }
 
-
     return true;
 }
 
 bool is_valid_style(char *str)
 {
     strip_quotes(str);
-    if (!str || strlen(str) == 0) {
+    if (!str || strlen(str) == 0)
+    {
         return false;
     }
-    
-    char temp[1000];  
+
+    char temp[1000];
     strcpy(temp, str);
-    
-    if (strchr(temp, ';') == NULL) {
-        
-        char* colon = strchr(temp, ':');
-        if (!colon) {
-            return false; 
+
+    if (strchr(temp, ';') == NULL)
+    {
+
+        char *colon = strchr(temp, ':');
+        if (!colon)
+        {
+            return false;
         }
-        
 
-        *colon = '\0'; 
-        char* property = temp;
-        char* value = colon + 1;
-        
+        *colon = '\0';
+        char *property = temp;
+        char *value = colon + 1;
 
-        while (*property == ' ') property++;
-        char* prop_end = property + strlen(property) - 1;
-        while (prop_end > property && *prop_end == ' ') {
+        while (*property == ' ')
+            property++;
+        char *prop_end = property + strlen(property) - 1;
+        while (prop_end > property && *prop_end == ' ')
+        {
             *prop_end = '\0';
             prop_end--;
         }
-        
 
-        while (*value == ' ') value++;
-        char* val_end = value + strlen(value) - 1;
-        while (val_end > value && *val_end == ' ') {
+        while (*value == ' ')
+            value++;
+        char *val_end = value + strlen(value) - 1;
+        while (val_end > value && *val_end == ' ')
+        {
             *val_end = '\0';
             val_end--;
         }
-        
 
-        if (!is_valid_property(property)) {
+        if (!is_valid_property(property))
+        {
             return false;
         }
-        
 
-        if (strlen(value) == 0) {
+        if (strlen(value) == 0)
+        {
             return false;
         }
-        
 
-        if (strcmp(property, "font_size") == 0) {
-            if (!is_valid_font_size(value)) {
+        if (strcmp(property, "font_size") == 0)
+        {
+            if (!is_valid_font_size(value))
+            {
                 return false;
             }
         }
-        
-        return true; 
+
+        return true;
     }
-    
 
-    char* token = strtok(temp, ";");
+    char *token = strtok(temp, ";");
     int property_count = 0;
-    bool seen_properties[4] = {false}; 
-    
-    while (token != NULL) {
+    bool seen_properties[4] = {false};
 
-        if (strlen(token) == 0) {
+    while (token != NULL)
+    {
+
+        if (strlen(token) == 0)
+        {
             token = strtok(NULL, ";");
             continue;
         }
-        
+
         property_count++;
-        if (property_count > 4) {
-            return false; 
+        if (property_count > 4)
+        {
+            return false;
         }
-        
 
-        char* colon = strchr(token, ':');
-        if (!colon) {
-            return false; 
+        char *colon = strchr(token, ':');
+        if (!colon)
+        {
+            return false;
         }
-        
 
-        *colon = '\0'; 
-        char* property = token;
-        char* value = colon + 1;
-        
+        *colon = '\0';
+        char *property = token;
+        char *value = colon + 1;
 
-        while (*property == ' ') property++;
-        char* prop_end = property + strlen(property) - 1;
-        while (prop_end > property && *prop_end == ' ') {
+        while (*property == ' ')
+            property++;
+        char *prop_end = property + strlen(property) - 1;
+        while (prop_end > property && *prop_end == ' ')
+        {
             *prop_end = '\0';
             prop_end--;
         }
-        
 
-        while (*value == ' ') value++;
-        char* val_end = value + strlen(value) - 1;
-        while (val_end > value && *val_end == ' ') {
+        while (*value == ' ')
+            value++;
+        char *val_end = value + strlen(value) - 1;
+        while (val_end > value && *val_end == ' ')
+        {
             *val_end = '\0';
             val_end--;
         }
-        
 
-        if (!is_valid_property(property)) {
+        if (!is_valid_property(property))
+        {
             return false;
         }
-        
 
-        if (strlen(value) == 0) {
+        if (strlen(value) == 0)
+        {
             return false;
         }
-        
 
-        if (strcmp(property, "font_size") == 0) {
-            if (!is_valid_font_size(value)) {
+        if (strcmp(property, "font_size") == 0)
+        {
+            if (!is_valid_font_size(value))
+            {
                 return false;
             }
         }
-        
 
         int prop_index = -1;
-        for (int i = 0; i < 4; i++) {
-            if (strcmp(property, valid_properties[i]) == 0) {
+        for (int i = 0; i < 4; i++)
+        {
+            if (strcmp(property, valid_properties[i]) == 0)
+            {
                 prop_index = i;
                 break;
             }
         }
-        
-        if (seen_properties[prop_index]) {
-            return false; 
+
+        if (seen_properties[prop_index])
+        {
+            return false;
         }
         seen_properties[prop_index] = true;
-        
+
         token = strtok(NULL, ";");
     }
-    
-    return true; 
+
+    return true;
 }
 
 void set_submit_found(bool submit)
