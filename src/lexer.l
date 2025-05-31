@@ -1,13 +1,11 @@
 %{
-#include "myhtml.tab.h"
+#include "parser.h"
 #include <string.h>
 #include <stdio.h>
-void yyerror(const char *s);
-// #define debug_token(tok) printf("TOKEN: %s\n", tok);
+
 #define debug_token(tok)
 
 int line_number = 1;
-// int id_count = 0;
 %}
 
 %option noyywrap
