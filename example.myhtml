@@ -6,11 +6,12 @@
     <meta name="something" content="something">
 </head>
 <body>
-    <form id="f1" style="color:black">
+    <form id="f1" style="color:black" input_count=2>
         
         <!--this is a comment-->
         <input id="i1" type="text" value="something">
         <input id="i2" type="checkbox" value="something">
+        <input id="i5" type="checkbox" value="something">
         <input id="i3" type="submit" value="something">
         <label for="i1"></label>
         <label for="i2"></label>
@@ -23,7 +24,7 @@
     <!--this is a comment-->
     Hello
     </p>
-    <div style="colory:red; font_size:12px;">
+    <div style="color:red; font_size:12px;">
         <a id="a1" href="./something.com">
             An image
             <img src="http://image.png" alt="example">

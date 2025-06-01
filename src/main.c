@@ -5,7 +5,6 @@
 
 extern int yyparse(void);
 extern void yyrestart(FILE * input_file);
-extern int line_number;
 
 
 int main(int argc, char *argv[]) {
@@ -37,17 +36,7 @@ int main(int argc, char *argv[]) {
     int result = yyparse();
     fclose(input);
 
-    show_errors();
-
-    if (result == 0)
-    {
-        printf("Program has correct syntax\n");
-    }
-
-    else 
-    {
-        printf("Syntax error on line %d\n", line_number);
-    }
+    show_errors(result);
 
     return result;
 }

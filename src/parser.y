@@ -8,9 +8,9 @@
 
 void yyerror(const char *s);
 int yylex(void);
-// void yyrestart(FILE * input_file);
 
 extern int line_number;
+extern int input_count_num;
 
 
 %}
@@ -41,8 +41,10 @@ extern int line_number;
 %token <intval> POSITIVE_INT
 %token GT
 %token <str> ID_ATTR
+%token <intval>INPUT_COUNT
 
 %type <str> text text_opt
+%type <intval> input_count_opt
 
 %%
 
@@ -122,7 +124,6 @@ p:
 p_attr:
     ID_ATTR QUOTED_TEXT
     {
-        // printf("Checking id %s", $1);
         if (!check_id($2))
         {
             add_error(line_number, id_err);
@@ -135,7 +136,6 @@ p_attr:
     }
     | STYLE_ATTR QUOTED_TEXT ID_ATTR QUOTED_TEXT
     {
-        // printf("Checking id %s", $3);
         if (!check_id($3))
         {
             add_error(line_number, id_err);
@@ -148,7 +148,6 @@ p_attr:
     }
     | ID_ATTR QUOTED_TEXT STYLE_ATTR QUOTED_TEXT
     {
-        // printf("Checking id %s", $2);
         if (!check_id($2))
         {
             add_error(line_number, id_err);
@@ -223,7 +222,6 @@ a_attr:
 
         }
 
-        // printf("HREF IS: %s", $4);
     }
     ;
 
@@ -261,7 +259,30 @@ img_opt_attr:
     ;
 
 form:
-    START_FORM form_attr GT form_content_list END_FORM
+    START_FORM form_attr input_count_opt GT form_content_list END_FORM
+    {
+        if (get_checkbox_counter() > 0)
+        {
+            if ($3 != get_checkbox_counter())
+            {
+                add_error(line_number, input_count_err);
+            }
+        }
+
+        else 
+        {
+            if ($3 != -1)
+            {
+                add_error(line_number, input_count_used_err);
+            }
+        }
+    }
+    ;
+
+input_count_opt:
+    {$$ = -1;}
+    | INPUT_COUNT POSITIVE_INT
+    {$$ = $2;}
     ;
 
 form_attr:
@@ -353,6 +374,11 @@ input_attrs:
                 set_submit_found(true);
             }
 
+            if (strcmp($4, "checkbox") == 0)
+            {
+                inc_checkbox_counter();
+            }
+
             
         }
     }
@@ -389,6 +415,11 @@ input_attrs:
             {
 
                 set_submit_found(true);
+            }
+
+            if (strcmp($2, "checkbox") == 0)
+            {
+                inc_checkbox_counter();
             }
 
             
@@ -440,7 +471,7 @@ text_opt:
 
 void yyerror(const char *s) 
 {
-
+    printf("ERROR: Syntax is not correct at line %d\n", line_number);
 }
 
 

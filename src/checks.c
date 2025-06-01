@@ -17,6 +17,7 @@ static char used_input_id_array[MAX_IDS][MAX_ID_LEN];
 static int id_count = 0;
 static int input_id_count = 0;
 static int used_input_id_count = 0;
+static int checkbox_counter = 0;
 
 static bool submit_type_found = false;
 
@@ -69,6 +70,14 @@ static char *error_to_mesg(err_type_t err)
 
     case style_err:
         return "Style properties are not valid";
+        break;
+
+    case input_count_err:
+        return "Input checkbox count does not match the input_count attribute";
+        break;
+
+    case input_count_used_err:
+        return "No input checkbox types exist so no input_count attribute should be used";
         break;
     }
 }
@@ -270,6 +279,16 @@ bool is_valid_style(char *str)
     return true;
 }
 
+void inc_checkbox_counter()
+{
+    checkbox_counter++;
+}
+
+int get_checkbox_counter()
+{
+    return checkbox_counter;
+}
+
 void set_submit_found(bool submit)
 {
     submit_type_found = submit;
@@ -287,18 +306,26 @@ void add_error(int line_number, err_type_t err)
     error_stack[error_pointer].type = err;
 }
 
-void show_errors()
+void show_errors(int result)
 {
-    while (error_pointer != 0)
+
+    if (error_pointer != 0)
     {
-        printf("ERROR: %s at line %d\n", error_to_mesg(error_stack[error_pointer].type), error_stack[error_pointer].line);
-        error_pointer--;
+        while (error_pointer != 0)
+        {
+            printf("ERROR: %s at line %d\n", error_to_mesg(error_stack[error_pointer].type), error_stack[error_pointer].line);
+            error_pointer--;
+        }
+    }
+
+    else if (error_pointer == 0 && result == 0)
+    {
+        printf("Program has been parsed successfully");
     }
 }
 
 bool check_id(char *id)
 {
-    // printf("checking %s", id);
 
     strip_quotes(id);
     for (int i = 0; i < id_count; i++)

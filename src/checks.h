@@ -11,7 +11,9 @@ typedef enum
     src_err,
     type_err,
     for_err,
-    style_err
+    style_err,
+    input_count_err,
+    input_count_used_err
 } err_type_t;
 
 typedef struct
@@ -31,9 +33,12 @@ bool is_valid_style(char *style);
 bool type_is_valid(char *type);
 
 void add_error(int line_number, err_type_t err);
-void show_errors();
+void show_errors(int result);
 void set_submit_found(bool submit);
 bool get_submit_found();
+void inc_checkbox_counter();
+int get_checkbox_counter();
+
 
 
 

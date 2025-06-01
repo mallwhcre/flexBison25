@@ -6,6 +6,7 @@
 #define debug_token(tok)
 
 int line_number = 1;
+int input_count_num = 0;
 %}
 
 %option noyywrap
@@ -67,6 +68,7 @@ COMMENT_BODY ([^-]|(-[^-]))*
 "width="                    { debug_token("WIDTH_ATTR"); return WIDTH_ATTR; }
 "height="                   { debug_token("HEIGHT_ATTR"); return HEIGHT_ATTR; }
 "id="                       {return ID_ATTR;}
+"input_count="              {return INPUT_COUNT;}
 
 
 {DQUOTE}[^"]*{DQUOTE}       {
