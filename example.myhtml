@@ -6,10 +6,10 @@
     <meta name="something" content="something">
 </head>
 <body>
-    <form id="f1" style="color:black" input_count=2>
+    <form id="f1" style="color:black" input_count=1>
         
         <!--this is a comment-->
-        <input id="i1" type="text" value="something">
+        <input id="i2" type="text" value="something">
         <input id="i2" type="checkbox" value="something">
         <input id="i5" type="checkbox" value="something">
         <input id="i3" type="submit" value="something">
