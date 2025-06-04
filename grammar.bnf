@@ -1,41 +1,114 @@
-<myhtml> ::= <start_MYHTML> <head>? <body> <end_MYHTML>
+<myhtml> ::= "<MYHTML>" <head_opt> <body> "</MYHTML>"
 
-<start_MYHTML> ::= "<MYHTML>"
-<end_MYHTML> ::= "</MYHTML>"
+<head_opt> ::= ε
+             | <head>
 
-<head> ::= <start_head> <title> <meta>* <end_head>
-<start_head> ::= "<head>"
-<end_head> ::= "</head>"
+<head> ::= "<head>" <title> <head_opt_list> "</head>"
 
-<title> ::= "<title>" <text> "</title>"
-<meta> ::= "<meta" <meta_attr_group> "/>"
+<head_opt_list> ::= ε
+                  | <head_opt_list> <head_content>
+
+<head_content> ::= <meta>
+                 | <comment>
+
+<title> ::= "<title>" <text_opt> "</title>"
+
+<meta> ::= "<meta" <meta_attr_group> ">"
+
 <meta_attr_group> ::= "charset=" <quoted_text>
-                   | "name=" <quoted_text> " content=" <quoted_text>
+                    | "name=" <quoted_text> " content=" <quoted_text>
 
-<body> ::= <start_body> (<body_elements> | <comment>)* <end_body>
-<start_body> ::= "<body>"
-<end_body> ::= "</body>"
+<body> ::= "<body>" <body_content_list> "</body>"
 
-<body_elements> ::= <p> | <a> | <img> | <form> | <div>
+<body_content_list> ::= ε
+                      | <body_content_list> <body_content>
 
-<p> ::= "<p" <style_attr>? ">" (<text> | <comment>)* "</p>"
-<a> ::= "<a href=" <quoted_text> ">" (<img>? <text>? | <text>? <img>?) "</a>"
-<img> ::= "<img" <img_attr_group> "/>"
-<img_attr_group> ::= "src=" <quoted_text> " alt=" <quoted_text> (<img_opt_attr>)*
-<img_opt_attr> ::= " width=" <positive_int> | " height=" <positive_int>
+<body_content> ::= <body_element>
+                 | <comment>
 
-<form> ::= "<form" <style_attr>? ">" (<input> | <label>)+ "</form>"
-<input> ::= "<input type=" <quoted_text> (<input_opt_attr>)* "/>"
-<input_opt_attr> ::= " value=" <quoted_text> | " style=" <quoted_text>
+<body_element> ::= <p>
+                 | <a>
+                 | <img>
+                 | <form>
+                 | <div>
 
-<label> ::= "<label for=" <quoted_text> <style_attr>? ">" (<text> | <comment>)* "</label>"
-<div> ::= "<div" <style_attr>? ">" (<body_elements> | <comment>)* "</div>"
+<p> ::= "<p" <p_attr> ">" <p_contents_list> "</p>"
 
-<style_attr> ::= "style=" <quoted_text>
-<quoted_text> ::= '"' <text> '"' | '\'' <text> '\''
-<text> ::= (<text_data> | <comment>)*
+<p_attr> ::= ε
+           | "id=" <quoted_text>
+           | "style=" <quoted_text> "id=" <quoted_text>
+           | "id=" <quoted_text> "style=" <quoted_text>
+
+<p_contents_list> ::= ε
+                    | <p_contents_list> <p_contents>
+
+<p_contents> ::= <text>
+               | <comment>
+
+<a> ::= "<a" <a_attr> ">" <comments_opt> <a_content> <comments_opt> "</a>"
+
+<a_attr> ::= "href=" <quoted_text> "id=" <quoted_text>
+           | "id=" <quoted_text> "href=" <quoted_text>
+
+<a_content> ::= <text>
+              | <img>
+              | <text> <img>
+              | <img> <text>
+
+<comments_opt> ::= ε
+                 | <comment>
+
+<img> ::= "<img" "src=" <quoted_text> " alt=" <quoted_text> <img_opt_attr> ">"
+
+<img_opt_attr> ::= ε
+                 | " width=" <positive_int> " height=" <positive_int>
+                 | " height=" <positive_int> " width=" <positive_int>
+
+<form> ::= "<form" <form_attr> <input_count_opt> ">" <form_content_list> "</form>"
+
+<form_attr> ::= ε
+              | "id=" <quoted_text>
+              | "style=" <quoted_text> "id=" <quoted_text>
+              | "id=" <quoted_text> "style=" <quoted_text>
+
+<input_count_opt> ::= ε
+                    | "input_count=" <positive_int>
+
+<form_content_list> ::= <form_content_list> <form_content> <comments_opt>
+                      | <comments_opt> <form_content> <comments_opt>
+
+<form_content> ::= <input>
+                 | <label>
+
+<input> ::= "<input" <input_attrs> <input_opt_attr> ">"
+
+<input_attrs> ::= "id=" <quoted_text> "type=" <quoted_text>
+                | "type=" <quoted_text> "id=" <quoted_text>
+
+<input_opt_attr> ::= ε
+                   | "value=" <quoted_text> <style_opt>
+
+<style_opt> ::= ε
+              | "style=" <quoted_text>
+
+<label> ::= "<label for=" <quoted_text> <style_opt> ">" <text_opt> "</label>"
+
+<div> ::= "<div" <style_opt> ">" <div_content_list> "</div>"
+
+<div_content_list> ::= ε
+                     | <div_content_list> <body_element>
+
+<text_opt> ::= ε
+             | <text>
+
+<text> ::= <text_data>*
+
 <text_data> ::= [any valid character data excluding '<' and '>']
-<positive_int> ::= [0-9]+
+
+<quoted_text> ::= '"' <text>? '"' | '\'' <text>? '\''
+
+<positive_int> ::= [1-9][0-9]* | 0
 
 <comment> ::= "<!--" <comment_text> "-->"
+
 <comment_text> ::= [any sequence of characters excluding "--" not followed by ">"]
