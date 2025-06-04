@@ -1,0 +1,40 @@
+<MYHTML>
+<head>
+    <title>Test Title</title>
+    <!--this is a comment-->
+    <meta charset="test">
+    <meta name="something" content="something">
+</head>
+<body>
+    <form id="f1" style="color:black" input_count=2>
+        
+        <!--this is a comment-->
+        <input id="i1" type="text" value="something">
+        <input id="i2" type="checkbox" value="something">
+        <input id="i5" type="checkbox" value="something">
+        <input id="i3" type="submit" value="something">
+        <label for="i1"></label>
+        <label for="i2"></label>
+        <!--this is a comment-->
+        
+    </form>
+    <!--this is a comment-->
+    <p id="p1" style="font_size:12%">
+    
+    <!--this is a comment-->
+    Hello
+    </p>
+    <div style="color:red; font_size:12px;">
+        <a id="a1" href="not_a_url">
+            An image
+            <img src="http://image.png" alt="example">
+        </a>
+        <a id="a2" href="#a1">
+            An image
+            <img src="http://image.png" alt="example">
+        </a>
+        <p id="p2" style="font_family:arial"></p>
+    </div>
+
+</body>
+</MYHTML>

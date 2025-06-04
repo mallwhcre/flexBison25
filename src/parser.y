@@ -1,7 +1,6 @@
 %{
 #include <stdio.h>
 #include <stdlib.h>
-#include <string.h>
 #include <stdbool.h>
 #include <string.h>
 #include "checks.h"
@@ -45,6 +44,8 @@ extern int input_count_num;
 
 %type <str> text text_opt
 %type <intval> input_count_opt
+
+%start myhtml
 
 %%
 
@@ -341,13 +342,13 @@ input:
 input_attrs:
     ID_ATTR QUOTED_TEXT TYPE_ATTR QUOTED_TEXT
     {
-        if (!check_id($2))
+        if (!check_id($2)) //if id already exists add an error
         {
             add_error(line_number, id_err);
 
         }
 
-        else
+        else //else insert id to both general id array and input id array
         {
             insert_id($2);
             insert_input_id($2);
@@ -361,7 +362,7 @@ input_attrs:
 
         else
         {
-            if (get_submit_found())
+            if (get_submit_found()) //if submit is already found in the file add an error
             {
                  add_error(line_number, type_err);
 
@@ -371,7 +372,7 @@ input_attrs:
             else if (strcmp($4, "submit") == 0)
             {
 
-                set_submit_found(true);
+                set_submit_found(true); //set submit is found in the file
             }
 
             if (strcmp($4, "checkbox") == 0)
@@ -450,6 +451,7 @@ label:
 
 div:
     START_DIV style_opt GT div_content_list END_DIV
+    ;
 
 div_content_list:
     /*nothing*/

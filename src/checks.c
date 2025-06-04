@@ -30,6 +30,7 @@ static const char *valid_properties[] = {
 static char *strip_quotes(char *str)
 {
     size_t len = strlen(str);
+
     if (len >= 2 && str[0] == '"' && str[len - 1] == '"')
     {
         memmove(str, str + 1, len - 2);
@@ -82,7 +83,7 @@ static char *error_to_mesg(err_type_t err)
     }
 }
 
-static bool is_valid_property(const char *prop)
+static bool is_valid_property(const char *prop) // compares the property with the valid properties array
 {
     for (int i = 0; i < 4; i++)
     {
@@ -132,6 +133,7 @@ static bool is_valid_font_size(const char *value)
 bool is_valid_style(char *str)
 {
     strip_quotes(str);
+
     if (!str || strlen(str) == 0)
     {
         return false;
@@ -140,6 +142,7 @@ bool is_valid_style(char *str)
     char temp[1000];
     strcpy(temp, str);
 
+    // in case of only one property
     if (strchr(temp, ';') == NULL)
     {
 
@@ -153,8 +156,11 @@ bool is_valid_style(char *str)
         char *property = temp;
         char *value = colon + 1;
 
-        while (*property == ' ')
+        while (*property == ' ') // remove any spaces
+        {
             property++;
+        }
+
         char *prop_end = property + strlen(property) - 1;
         while (prop_end > property && *prop_end == ' ')
         {
@@ -163,7 +169,10 @@ bool is_valid_style(char *str)
         }
 
         while (*value == ' ')
+        {
             value++;
+        }
+
         char *val_end = value + strlen(value) - 1;
         while (val_end > value && *val_end == ' ')
         {
@@ -171,7 +180,7 @@ bool is_valid_style(char *str)
             val_end--;
         }
 
-        if (!is_valid_property(property))
+        if (!is_valid_property(property)) // check if the property is valid
         {
             return false;
         }
@@ -195,6 +204,8 @@ bool is_valid_style(char *str)
     char *token = strtok(temp, ";");
     int property_count = 0;
     bool seen_properties[4] = {false};
+
+    // for multiple properties
 
     while (token != NULL)
     {
@@ -222,8 +233,12 @@ bool is_valid_style(char *str)
         char *value = colon + 1;
 
         while (*property == ' ')
+        {
             property++;
+        }
+
         char *prop_end = property + strlen(property) - 1;
+
         while (prop_end > property && *prop_end == ' ')
         {
             *prop_end = '\0';
@@ -231,8 +246,11 @@ bool is_valid_style(char *str)
         }
 
         while (*value == ' ')
+        {
             value++;
+        }
         char *val_end = value + strlen(value) - 1;
+
         while (val_end > value && *val_end == ' ')
         {
             *val_end = '\0';
@@ -257,6 +275,7 @@ bool is_valid_style(char *str)
             }
         }
 
+        // checking for not properties that appear more than one time
         int prop_index = -1;
         for (int i = 0; i < 4; i++)
         {
@@ -271,6 +290,7 @@ bool is_valid_style(char *str)
         {
             return false;
         }
+
         seen_properties[prop_index] = true;
 
         token = strtok(NULL, ";");
@@ -311,7 +331,7 @@ void show_errors(int result)
 
     if (error_pointer != 0)
     {
-        while (error_pointer != 0)
+        while (error_pointer != 0) // print the errors from the error stack
         {
             printf("ERROR: %s at line %d\n", error_to_mesg(error_stack[error_pointer].type), error_stack[error_pointer].line);
             error_pointer--;

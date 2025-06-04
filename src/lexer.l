@@ -97,7 +97,7 @@ COMMENT_BODY ([^-]|(-[^-]))*
 
 {WHITESPACE}                { /* skip whitespace */ }
 
-\n                          {line_number++;}
+\n                          {line_number++;} //increment a variable to know the number of the line
 
 
 

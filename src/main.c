@@ -15,9 +15,9 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    char st[23] = "../";
+    char st[100] = "../examples/"; // file should be placed inside the examples directory
 
-    FILE *input = fopen(strcat(st, argv[1]), "r");
+    FILE *input = fopen(strcat(st, argv[1]), "r"); // print file first
     if (!input)
     {
         perror("Error opening file");
@@ -26,16 +26,26 @@ int main(int argc, char *argv[])
 
     printf("======= INPUT ======\n");
     int ch;
+    int line = 1;
+
+    printf("%d: ", line); // print the first line number
+
     while ((ch = fgetc(input)) != EOF)
     {
         putchar(ch);
+        if (ch == '\n')
+        {
+            line++;
+            printf("%d: ", line); // print next line number
+        }
     }
+
     printf("\n=====================\n");
 
-    rewind(input);
+    rewind(input); // return the cursor at the begining
     yyrestart(input);
 
-    int result = yyparse();
+    int result = yyparse(); // parse the file
     fclose(input);
 
     show_errors(result);
